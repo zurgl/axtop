@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::State, routing::get, Router, Server};
+use axum::{extract::State, response::IntoResponse, routing::get, Json, Router, Server};
 use sysinfo::{CpuExt, System, SystemExt};
 use tokio::sync::Mutex;
 
@@ -27,18 +27,10 @@ async fn root_get() -> &'static str {
     "Hello"
 }
 
-async fn cpus_get(State(state): State<AppState>) -> String {
-    use std::fmt::Write;
-
-    let mut s = String::new();
+async fn cpus_get(State(state): State<AppState>) -> impl IntoResponse {
     let mut sys = state.sys.lock().await;
     sys.refresh_cpu();
 
-    for (i, cpu) in sys.cpus().iter().enumerate() {
-        let i = i + 1;
-
-        let usage = cpu.cpu_usage();
-        writeln!(&mut s, "CPU {i} {usage}%").unwrap();
-    }
-    s
+    let v: Vec<_> = sys.cpus().iter().map(|cpu| cpu.cpu_usage()).collect();
+    Json(v)
 }
