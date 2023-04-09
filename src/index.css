@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+
+* {
+  font-family: 'Roboro', sans-serif;
+}
+
+body {
+  background: #EDF6F9;
+}
+
+.bar {
+  background: #FFDDD2;
+  width: 20em;
+  height: 2em;
+  margin: 1em;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+}
+
+.bar label {
+  z-index: 10;
+}
+
+.bar .bar-inner {
+  z-index: 5;
+
+  background: #E29578;
+  height: 100%;
+
+  position: absolute;
+  top: 0em;
+  left: 0em;
+  bottom: 0em;
+
+
+
+  transition: width 0.1s;
+}

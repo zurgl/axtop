@@ -15,6 +15,7 @@ async fn main() {
     let router = Router::new()
         .route("/", get(root_get))
         .route("/index.mjs", get(indexmjs_get))
+        .route("/index.css", get(indexcss_get))
         .route("/api/cpus", get(cpus_get))
         .with_state(AppState {
             sys: Arc::new(Mutex::new(System::new())),
@@ -43,6 +44,16 @@ async fn indexmjs_get() -> impl IntoResponse {
     Response::builder()
         .header("content-type", "application/javascript;charset=utf-8")
         .body(mjs)
+        .unwrap()
+}
+
+#[axum::debug_handler]
+async fn indexcss_get() -> impl IntoResponse {
+    let css = tokio::fs::read_to_string("src/index.css").await.unwrap();
+
+    Response::builder()
+        .header("content-type", "text/css;charset=utf-8")
+        .body(css)
         .unwrap()
 }
 
