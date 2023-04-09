@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 async fn main() {
     let router = Router::new()
         .route("/", get(root_get))
-        .route("/index.js", get(indexjs_get))
+        .route("/index.mjs", get(indexmjs_get))
         .route("/api/cpus", get(cpus_get))
         .with_state(AppState {
             sys: Arc::new(Mutex::new(System::new())),
@@ -37,12 +37,12 @@ async fn root_get() -> impl IntoResponse {
 }
 
 #[axum::debug_handler]
-async fn indexjs_get() -> impl IntoResponse {
-    let js = tokio::fs::read_to_string("src/index.js").await.unwrap();
+async fn indexmjs_get() -> impl IntoResponse {
+    let mjs = tokio::fs::read_to_string("src/index.mjs").await.unwrap();
 
     Response::builder()
-        .header("content-type", "application/javascript:charset=utf-8")
-        .body(js)
+        .header("content-type", "application/javascript;charset=utf-8")
+        .body(mjs)
         .unwrap()
 }
 
