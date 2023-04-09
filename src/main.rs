@@ -1,7 +1,10 @@
 use std::sync::{Arc, Mutex};
 
 use axum::{
-    extract::State,
+    extract::{
+        ws::{Message, WebSocket},
+        State, WebSocketUpgrade,
+    },
     http::Response,
     response::{Html, IntoResponse},
     routing::get,
@@ -11,13 +14,16 @@ use sysinfo::{CpuExt, System, SystemExt};
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::init();
+
     let app_state = AppState::default();
 
     let router = Router::new()
         .route("/", get(root_get))
         .route("/index.mjs", get(indexmjs_get))
         .route("/index.css", get(indexcss_get))
-        .route("/api/cpus", get(cpus_get))
+        .route("/api/cpus", get(api_cpus_get))
+        .route("/realtime/cpus", get(realtime_cpus_get))
         .with_state(app_state.clone());
 
     tokio::task::spawn_blocking(move || {
@@ -34,7 +40,7 @@ async fn main() {
         }
     });
 
-    let server = Server::bind(&"0.0.0.0:7032".parse().unwrap()).serve(router.into_make_service());
+    let server = Server::bind(&"127.0.0.1:7032".parse().unwrap()).serve(router.into_make_service());
     let addr = server.local_addr();
     println!("Listening on {addr}");
     server.await.unwrap();
@@ -72,11 +78,27 @@ async fn indexcss_get() -> impl IntoResponse {
 }
 
 #[axum::debug_handler]
-async fn cpus_get(State(state): State<AppState>) -> impl IntoResponse {
+async fn api_cpus_get(State(state): State<AppState>) -> impl IntoResponse {
     let lock_start = std::time::Instant::now();
     let cpu = state.cpus.lock().unwrap().clone();
     let lock_elapsed = lock_start.elapsed().as_millis();
     println!("Lock time: {}ms", lock_elapsed);
 
     Json(cpu)
+}
+
+#[axum::debug_handler]
+async fn realtime_cpus_get(
+    ws: WebSocketUpgrade,
+    State(state): State<AppState>,
+) -> impl IntoResponse {
+    ws.on_upgrade(|ws: WebSocket| async { realtime_cpus_stream(state, ws).await })
+}
+
+async fn realtime_cpus_stream(app_state: AppState, mut ws: WebSocket) {
+    loop {
+        let payload = serde_json::to_string(&*app_state.cpus.lock().unwrap()).unwrap();
+        ws.send(Message::Text(payload)).await.unwrap();
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    }
 }
