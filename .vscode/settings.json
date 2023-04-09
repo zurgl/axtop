@@ -1,0 +1,29 @@
+{
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.minimap.enabled": false,
+    "editor.rulers": [
+      185
+    ],
+    "editor.wordWrapColumn": 180,
+    "css.lint.unknownAtRules": "ignore",
+    "editor.wordWrap": "wordWrapColumn",
+    "[rust]": {
+      "editor.defaultFormatter": "rust-lang.rust-analyzer",
+      "editor.formatOnSave": true,
+    },
+    "files.exclude": {
+      "diffusion": false,
+      "archives": true,
+      "data": true,
+      "target": true,
+      "README": false,
+      "LICENSE": false,
+      ".cargo": false,
+      "Cargo.lock": true,
+      ".env": false
+    },
+    "rust-analyzer.showUnlinkedFileNotification": false
+  }
