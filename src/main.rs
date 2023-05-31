@@ -25,7 +25,6 @@ async fn main() {
         .route("/", get(root_get))
         .route("/index.mjs", get(indexmjs_get))
         .route("/index.css", get(indexcss_get))
-        // .route("/api/cpus", get(api_cpus_get))
         .route("/realtime/cpus", get(realtime_cpus_get))
         .with_state(app_state.clone());
 
@@ -75,16 +74,6 @@ async fn indexcss_get() -> impl IntoResponse {
         .body(css)
         .unwrap()
 }
-
-// #[axum::debug_handler]
-// async fn api_cpus_get(State(state): State<AppState>) -> impl IntoResponse {
-//     let lock_start = std::time::Instant::now();
-//     let cpu = state.cpus.lock().unwrap().clone();
-//     let lock_elapsed = lock_start.elapsed().as_millis();
-//     println!("Lock time: {}ms", lock_elapsed);
-
-//     Json(cpu)
-// }
 
 #[axum::debug_handler]
 async fn realtime_cpus_get(
